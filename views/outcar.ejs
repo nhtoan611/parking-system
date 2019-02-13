@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.5.0/css/all.css' integrity='sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU' crossorigin='anonymous'>
+    <link rel="stylesheet" href="/public/css/style.css">
+
+    <script type="text/javascript" src="/public/js/socketio.js"></script>
+    <script type="text/javascript" defer src="/public/js/checkfl.js"></script>
+    <script type="text/javascript" src="/public/js/notify.js"></script>
+    <script type="text/javascript" src="/public/js/jquery.simplePagination.js"></script>
+    
+    <title>Car out</title>
+    <script>
+        $(document).ready(function(){
+            
+            //them moi xe vao
+            createCarIn();
+            //cap nhat xe ra
+            createCarOut();
+            
+            getListCarOut();
+
+            detailCarOut();
+
+            //filter bien so xe
+            $("#myInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#myTableCarOut tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+            
+            //filter xe theo ngay thang
+            $('#datePicker').change(function(){
+                var dateVal = new Date($('#datePicker').val()).toLocaleDateString();
+                $("#myTableCarOut tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(dateVal) > -1)
+                });
+            });
+            
+        });
+
+        function getListCarOut(){
+            $.ajax({
+                url: 'outcars/listCarOut',
+                method:'GET',
+                dataType: 'JSON',
+                success: function(data){
+                    createTableCarOut(data.carOut);
+                },
+                error: function(err){
+                    $.notify('Hiển thị thất bại',{
+                        className: "error",
+                        autoHideDelay: 1000
+                    });
+                }
+            })
+        };
+
+        function detailCarOut(){
+            $(document).on("click", "#listCarOut tbody tr td #btnDetails", function(){
+                var trid = $(this).closest('tr').attr('id');
+                //console.log(trid);
+                $.ajax({
+                    url: "/carInDetail",
+                    method: "GET",
+                    data: {
+                        id: trid
+                    },
+                    dataType: "JSON",
+                    success: function(data){
+                        //console.log(data);
+                        $('#carInId').val(data._id);
+                        $('#carNumberPlateDt').val(data.carNumberPlate);
+                        $('#carInTimeDt').val(new Date(data.carInTime).toLocaleString());
+                        $('#carOutTimeDt').val(new Date(data.carOutTime).toLocaleString());
+                        if(data.fee==0){
+                            $('#fee').val('Xe gửi theo tháng');
+                        }else{
+                            $('#fee').val(data.fee);
+                        }   
+                        $('#carOutImageDt').attr('src', data.carOutImage);
+                        $('#myModalDetail').modal('show');
+                    },
+                    error: function(error){
+                        $.notify('Hiển thị thất bại',{
+                            className: "error",
+                            autoHideDelay: 1000
+                        });
+                    }
+                })
+            })
+        };
+
+    </script>
+</head>
+
+<body>
+    <header>
+        <% include ./header %>
+    </header>
+
+    <main role="main" class="container">
+        <!-- List Car -->
+        <div class="container mt-3">
+            <h2>Danh sách xe ra</h2>
+            <div class="row">
+                <div class="col">
+                    <input class="form-control" id="myInput" type="text" placeholder="Biển số xe..">
+                </div>
+
+                <div class="col">
+                    <div class="form-group">
+                        <input id="datePicker" type="date" min="1000-01-01" max="3000-12-31" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <br>
+            <table class="table table-hover" id="listCarOut">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Biển số xe</th>
+                        <th>Thời gian vào</th>
+                        <th>Thời gian ra</th>
+                        <th>Số tiền đã trả</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="myTableCarOut">
+                    <tr style="display: none"></tr>
+                </tbody>
+            </table>
+
+        </div>
+
+        <!-- Modal car in -->
+        <% include ./modal %>
+
+        <!-- Modal Car Detail -->
+        <div class="modal fade" id="myModalDetail" role="dialog">
+            <div class="modal-dialog modal-lg">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Thông tin xe vào</h4>
+                    </div>
+                    <div class="modal-body" style="padding:40px 50px;">
+                        <img id="carOutImageDt" style="width: 700px;"></img>
+                        <form>
+                            <div class="form-group">
+                                <label>Biển số xe</label>
+                                <input type="text" class="form-control" id="carNumberPlateDt" name="carNumberPlateDt"
+                                    readonly>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col">
+                                    <label> Thời gian vào</label>
+                                    <input type="text" class="form-control" id="carInTimeDt" name="carInTimeDt" readonly>
+                                </div>
+                                <div class="form-group col">
+                                    <label> Thời gian ra</label>
+                                    <input type="text" class="form-control" id="carOutTimeDt" name="carOutTimeDt" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label> Số tiền đã trả</label>
+                                <input type="text" class="form-control" id="fee" name="fee" readonly>
+                            </div>
+                            <input type="hidden" id="carInId" name="carInId">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+</html>

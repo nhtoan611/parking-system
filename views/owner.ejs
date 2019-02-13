@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.5.0/css/all.css' integrity='sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU' crossorigin='anonymous'>
+    <link rel="stylesheet" href="/public/css/style.css">
+
+    <script type="text/javascript" src="/public/js/socketio.js"></script>
+    <script type="text/javascript" defer src="/public/js/checkfl.js"></script>
+    <script type="text/javascript" src="/public/js/notify.js"></script>
+    <title>Monthly Car</title>
+    <script>
+        $(document).ready(function () {
+            //them moi xe vao
+            createCarIn();
+            //cap nhat xe ra
+            createCarOut();
+            
+            $('#btnAddOwner').click(function(){
+                addNewOwner();
+            });
+
+            getListOwner();
+
+            $(document).on("click", "#listOwner tbody tr td #btnDelete", function() {
+                var trid = $(this).closest('tr').attr('id');   
+                deleteOwner(trid);
+            });
+
+            $(document).on("click", "#listOwner tbody tr td #btnUpdate", function() {
+                var row = $(this).closest("tr");
+                var id = row.attr('id');   
+                var ownerName = row.find(".ownerName").text();
+                var ownerPhoneNumber = row.find(".ownerPhoneNumber").text();
+                var carNumberPlate = row.find(".carNumberPlate").text();
+                $('#idUdp').val(id);
+                $('#ownerUdpName').val(ownerName);
+                $('#ownerUdpPhoneNumber').val(ownerPhoneNumber);
+                $('#carUdpNumberPlate').val(carNumberPlate);
+                $('#modalUpdateOwner').modal('show');             
+            });
+
+            $('#btnUdpOwner').click(function(){
+                var idUdp = $('#idUdp').val();
+                var ownerUdpName = $('#ownerUdpName').val();
+                var ownerUdpPhoneNumber = $('#ownerUdpPhoneNumber').val();
+                var carUdpNumberPlate = $('#carUdpNumberPlate').val();
+                updateOwner(idUdp, ownerUdpName, ownerUdpPhoneNumber, carUdpNumberPlate);
+            })
+
+        });
+        
+        function addNewOwner(){
+            $.ajax({
+                url: 'owners/add',
+                method: 'POST',
+                dataType: 'JSON',
+                data: {
+                    ownerName: $('#ownerName').val(),
+                    ownerPhoneNumber: $('#ownerPhoneNumber').val(),
+                    carNumberPlate: $('#carNumberPlate').val()
+                },
+                success: function(data){
+                    $.notify('Thêm mới thành công',{
+                        className: "success",
+                        autoHideDelay: 1000
+                    });
+                    $('#myTable').find('tr:gt(0)').remove();
+                    createTable(data);
+                },
+                error: function(err){
+                    $.notify('Thêm mới thất bại',{
+                        className: "error",
+                        autoHideDelay: 1000
+                    });
+                }
+            })
+        }
+
+        function getListOwner(){
+            $.ajax({
+                url: 'owners/listOwner',
+                method:'GET',
+                dataType: 'JSON',
+                success: function(data){
+                    createTable(data);
+                },
+                error: function(err){
+                    $.notify('Hiển thị thất bại',{
+                        className: "error",
+                        autoHideDelay: 1000
+                    });
+                }
+            })
+        }
+
+        function deleteOwner(id){
+            $.ajax({
+                url: 'owners/dltOwner',
+                method: 'DELETE',
+                data: {
+                    id: id
+                },
+                dataType: 'JSON',
+                success: function(data){
+                    $.notify('Xóa thành công',{
+                        className: "success",
+                        autoHideDelay: 1000
+                    });
+                    $('#myTable').find('tr:gt(0)').remove();
+                    createTable(data);
+                },
+                error: function(err){
+                    $.notify('Xóa thất bại',{
+                        className: "error",
+                        autoHideDelay: 1000
+                    });
+                }
+            })
+        }
+
+        function updateOwner(id, ownerName, ownerPhoneNumber, carNumberPlate){
+            $.ajax({
+                url: 'owners/updateOwner',
+                method: 'PUT',
+                dataType: 'JSON',
+                data: {
+                    id: id,
+                    ownerName: ownerName,
+                    ownerPhoneNumber: ownerPhoneNumber,
+                    carNumberPlate: carNumberPlate
+                },
+                success: function(data){
+                    $.notify('Cập nhật thành công',{
+                        className: "success",
+                        autoHideDelay: 1000
+                    });
+                    $('#myTable').find('tr:gt(0)').remove();
+                    createTable(data);
+                    $('#modalUpdateOwner').modal('hide'); 
+                },
+                error: function(err){
+                    $.notify('Cập nhật thất bại',{
+                        className: "error",
+                        autoHideDelay: 1000
+                    });
+                }
+            })
+        }
+
+        function createTable(data){
+            data.forEach(function(element){
+                $('#listOwner tr:last').after('<tr id="'+element._id+'"><td class="ownerName">'
+                                                + element.ownerName
+                                                + '</td><td class="ownerPhoneNumber">'
+                                                + element.ownerPhoneNumber
+                                                + '</td><td class="carNumberPlate">'
+                                                + element.carNumberPlate
+                                                + '</td><td><button id="btnDelete" type="button" class="btn btn-outline-danger mr-3">Xóa</button>'
+                                                + '<button id="btnUpdate" type="button" class="btn btn-outline-success">Cập nhật</button></td></tr>');
+                }); 
+        }
+        
+    </script>
+</head>
+
+<body>
+    <header>
+        <% include ./header %>
+    </header>
+
+    <main role="main" class="container">
+        <!-- Modal car in -->
+        <% include ./modal %>
+
+        <div class="container mt-3">
+            <h2>Danh sách xe gửi theo tháng</h2>
+            <div class="row">
+
+                <div class="col-8">
+                    <table class="table table-hover" id="listOwner">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Chủ xe</th>
+                                <th>Số điện thoại</th>
+                                <th>Biển số xe</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myTable">
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="col-4">
+                    <div class="card border-success">
+                        <div class="card-body">
+                            <h5 class="card-title">Thêm mới xe gửi theo tháng</h5>
+                            <form>
+                                <div class="form-group">
+                                    <label>Tên chủ xe:</label>
+                                    <input type="text" class="form-control" id="ownerName">
+                                </div>
+                                <div class="form-group">
+                                    <label>Số điện thoại chủ xe:</label>
+                                    <input type="text" class="form-control" id="ownerPhoneNumber">
+                                </div>
+                                <div class="form-group">
+                                    <label>Biển số xe:</label>
+                                    <input type="text" class="form-control" id="carNumberPlate">
+                                </div>
+                                <button type="button" id="btnAddOwner" class="btn btn-success">Thêm mới</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- The Modal -->
+        <div class="modal fade" id="modalUpdateOwner">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cập nhật thông tin xe</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <form>
+                            <input type="hidden" class="form-control" id="idUdp">
+                            <div class="form-group">
+                                <label>Tên chủ xe:</label>
+                                <input type="text" class="form-control" id="ownerUdpName">
+                            </div>
+                            <div class="form-group">
+                                <label>Số điện thoại chủ xe:</label>
+                                <input type="text" class="form-control" id="ownerUdpPhoneNumber">
+                            </div>
+                            <div class="form-group">
+                                <label>Biển số xe:</label>
+                                <input type="text" class="form-control" id="carUdpNumberPlate">
+                            </div>
+                            <button type="button" id="btnUdpOwner" class="btn btn-success">Cập nhật</button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+</body>
+
+</html>

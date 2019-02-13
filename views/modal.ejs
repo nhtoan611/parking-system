@@ -1,0 +1,65 @@
+<!-- Modal Car In -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Thông tin xe vào</h4>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+                <img id="imgElem" style="width: 700px;"></img>
+                <form>
+                    <div class="form-group mt-3">
+                        <label> Biển số xe</label>
+                        <input type="text" class="form-control" id="carInNumberPlate" name="carInNumberPlate">
+                    </div>
+                    <input type="hidden" id="carInImage" name="carInImage">
+                    <p id="txtNoti" class="text-danger"><i class="far fa-bell mr-3"></i>Xe trong danh sách theo dõi</p>
+                    <button type="button" class="btn btn-outline-success btn-block" id="btnCreateCarIn">
+                        Xác nhận</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Car Out -->
+<div class="modal fade" id="myModalOut" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Thông tin xe ra</h4>
+            </div>
+            <div class="modal-body" style="padding:40px 50px;">
+                <img id="imgElemOut" style="width: 700px;"></img>
+                <form>
+                    <div class="form-group mt-3">
+                        <label> Biển số xe</label>
+                        <input type="text" class="form-control" id="carOutNumberPlate" name="carOutNumberPlate">
+                    </div>
+                    <div class="form-group mt-2" id="costDiv">
+                        <label> Số tiền phải trả</label>
+                        <input type="text" class="form-control" id="costVal" readonly>
+                    </div>
+                    <input type="hidden" id="carOutImage" name="carOutImage">
+                    <p id="txtNotiFollow" class="text-danger"><i class="far fa-bell mr-3"></i>Xe trong danh sách theo dõi</p>
+                    <p id="txtNotiMonthly" class="text-danger"><i class="far fa-bell mr-3"></i>Xe gửi theo tháng</p>
+                    <p id="txtNotiErr" class="text-danger"><i class="far fa-bell mr-3"></i>Biển số xe không nằm trong bến</p>
+                    <button type="button" class="btn btn-outline-success btn-block" id="btnAddCarOut">
+                        Xác nhận</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>

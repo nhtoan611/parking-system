@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" href="/public/css/style.css">
+
+    <title>Login</title>
+
+    <style>
+        body {
+            padding-top: 90px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <% include ./header %>
+    </header>
+    
+    <div class="login-register-form">
+        <form action="/users/login" method="post">
+            <h2 class="text-center">Đăng nhập</h2>
+            <%if(typeof success_msg != "undefined" && success_msg != ''){%>
+            <div class="alert alert-success">
+                <%= success_msg %>
+            </div>
+            <%}%>
+            <%if(typeof error_msg != "undefined" && error_msg != ''){%>
+            <div class="alert alert-danger">
+                <%= error_msg %>
+            </div>
+            <%}%>
+            <%if(typeof error != "undefined" && error != ''){%>
+            <div class="alert alert-danger">
+                <%= error %>
+            </div>
+            <%}%>
+            <div class="form-group">
+                <input type="text" class="form-control" placeholder="Tài khoản" required="required" name="username">
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-control" placeholder="Mật khẩu" required="required" name="password">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn-login btn-primary btn-block">Đăng nhập</button>
+            </div>
+            <div class="clearfix">
+                <label class="pull-left checkbox-inline"><input type="checkbox"> Ghi nhớ</label>
+                <a href="#" class="pull-right">Phục hồi mật khẩu</a>
+            </div>
+        </form>
+        <p class="text-center"><a href="/users/register">Tạo một tài khoản mới</a></p>
+    </div>
+</body>
+
+</html>
